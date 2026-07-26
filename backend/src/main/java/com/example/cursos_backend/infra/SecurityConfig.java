@@ -1,4 +1,4 @@
-package com.example.cursos_backend.security;
+package com.example.cursos_backend.infra;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
