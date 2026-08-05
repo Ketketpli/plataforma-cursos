@@ -22,4 +22,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> categoryAlreadyExist(CategoryAlreadyExistsException categoryAlreadyExistsException) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(categoryAlreadyExistsException.getMessage());
     }
+
+    @ExceptionHandler(ValueNotFoundException.class)
+    public ResponseEntity<String> valueNotFoundException(ValueNotFoundException valueNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(valueNotFoundException.getMessage());
+    }
 }
