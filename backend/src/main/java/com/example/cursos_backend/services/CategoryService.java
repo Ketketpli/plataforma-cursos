@@ -7,6 +7,8 @@ import com.example.cursos_backend.exceptions.ValueNotFoundException;
 import com.example.cursos_backend.model.Category;
 import com.example.cursos_backend.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,13 +35,12 @@ public class CategoryService {
         );
     }
 
-    public List<CategoryResponseDTO> getAllCategories() {
+    public Page<CategoryResponseDTO> getAllCategories(Pageable pageable) {
 
-        List<Category> categories = categoryRepository.findAll();
-
-        return categories.stream()
-                .map(category -> new CategoryResponseDTO(category.getId(), category.getName()))
-                .toList();
+        return categoryRepository.findAll(pageable)
+                .map(category -> new CategoryResponseDTO(
+                        category.getId(),
+                        category.getName()));
     }
 
     public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO request) {
@@ -49,15 +50,16 @@ public class CategoryService {
 
         category.setName(request.name());
 
-        Category saved = categoryRepository.save(category);
+        category = categoryRepository.save(category);
 
-        return new CategoryResponseDTO(saved.getId(), saved.getName());
+        return new CategoryResponseDTO(category.getId(), category.getName());
     }
 
     public void deleteCategory(Long id) {
 
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(ValueNotFoundException::new);
+        if (!categoryRepository.existsById(id)) {
+            throw new ValueNotFoundException();
+        }
 
         categoryRepository.deleteById(id);
     }
