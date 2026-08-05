@@ -53,4 +53,12 @@ public class CategoryService {
 
         return new CategoryResponseDTO(saved.getId(), saved.getName());
     }
+
+    public void deleteCategory(Long id) {
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(ValueNotFoundException::new);
+
+        categoryRepository.deleteById(id);
+    }
 }
