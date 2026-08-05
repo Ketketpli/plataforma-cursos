@@ -17,4 +17,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> invalidCredentials(InvalidCredentialsException invalidCredentials) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(invalidCredentials.getMessage());
     }
+
+    @ExceptionHandler(CategoryAlreadyExistsException.class)
+    public ResponseEntity<String> categoryAlreadyExist(CategoryAlreadyExistsException categoryAlreadyExistsException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(categoryAlreadyExistsException.getMessage());
+    }
 }
