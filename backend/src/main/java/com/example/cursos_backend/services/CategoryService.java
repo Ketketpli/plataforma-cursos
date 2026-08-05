@@ -3,14 +3,13 @@ package com.example.cursos_backend.services;
 import com.example.cursos_backend.dtos.CategoryRequestDTO;
 import com.example.cursos_backend.dtos.CategoryResponseDTO;
 import com.example.cursos_backend.exceptions.CategoryAlreadyExistsException;
+import com.example.cursos_backend.exceptions.ValueNotFoundException;
 import com.example.cursos_backend.model.Category;
 import com.example.cursos_backend.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +40,17 @@ public class CategoryService {
         return categories.stream()
                 .map(category -> new CategoryResponseDTO(category.getId(), category.getName()))
                 .toList();
+    }
+
+    public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO request) {
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(ValueNotFoundException::new);
+
+        category.setName(request.name());
+
+        Category saved = categoryRepository.save(category);
+
+        return new CategoryResponseDTO(saved.getId(), saved.getName());
     }
 }
