@@ -56,12 +56,7 @@ public class CourseService {
 
         Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
-        boolean isOwner = course.getInstructor().getId().equals(user.getId());
-        boolean isAdmin = user.getRole() == Role.ADMIN;
-
-        if (!isOwner && !isAdmin) {
-            throw new InvalidAccessException();
-        }
+        checkAccess(course, user);
 
         HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
         Set<String> allCategories = categories.stream().map(Category::getName).collect(Collectors.toSet());
@@ -82,5 +77,24 @@ public class CourseService {
                 saved.getInstructor().getName(),
                 allCategories
         );
+    }
+
+    public void deleteCourse(Long id, User user) {
+
+        Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
+
+        checkAccess(course, user);
+
+        courseRepository.deleteById(id);
+    }
+
+    private void checkAccess(Course course, User user) {
+
+        boolean isOwner = course.getInstructor().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new InvalidAccessException();
+        }
     }
 }
