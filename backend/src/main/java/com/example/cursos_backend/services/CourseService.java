@@ -36,20 +36,9 @@ public class CourseService {
         course.setDuration(request.duration());
         course.setInstructor(instructor);
         course.setCategories(categories);
-        Course newCourse = courseRepository.save(course);
+        Course saved = courseRepository.save(course);
 
-        Set<String> categoryNames = categories.stream()
-                .map(Category::getName) // convertendo Stream<Category> para Stream<String>
-                .collect(Collectors.toSet()); // juntando o resultado numa coleção de Set<String>
-
-        return new CourseResponseDTO(
-                newCourse.getId(),
-                newCourse.getName(),
-                newCourse.getDescription(),
-                newCourse.getPrice(),
-                newCourse.getDuration(),
-                newCourse.getInstructor().getName(),
-                categoryNames);
+        return toResponseDTO(saved);
     }
 
     public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, User user) {
@@ -59,7 +48,6 @@ public class CourseService {
         checkAccess(course, user);
 
         HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
-        Set<String> allCategories = categories.stream().map(Category::getName).collect(Collectors.toSet());
 
         course.setName(request.name());
         course.setDescription(request.description());
@@ -68,15 +56,7 @@ public class CourseService {
         course.setCategories(categories);
         Course saved = courseRepository.save(course);
 
-        return new CourseResponseDTO(
-                saved.getId(),
-                saved.getName(),
-                saved.getDescription(),
-                saved.getPrice(),
-                saved.getDuration(),
-                saved.getInstructor().getName(),
-                allCategories
-        );
+        return toResponseDTO(saved);
     }
 
     public void deleteCourse(Long id, User user) {
@@ -96,5 +76,17 @@ public class CourseService {
         if (!isOwner && !isAdmin) {
             throw new InvalidAccessException();
         }
+    }
+
+    private CourseResponseDTO toResponseDTO(Course course) {
+
+        return new CourseResponseDTO(
+                course.getId(),
+                course.getName(),
+                course.getDescription(),
+                course.getPrice(),
+                course.getDuration(),
+                course.getInstructor().getName(),
+                course.getCategories().stream().map(Category::getName).collect(Collectors.toSet()));
     }
 }
