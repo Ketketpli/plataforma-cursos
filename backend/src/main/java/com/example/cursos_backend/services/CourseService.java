@@ -2,6 +2,9 @@ package com.example.cursos_backend.services;
 
 import com.example.cursos_backend.dtos.CourseRequestDTO;
 import com.example.cursos_backend.dtos.CourseResponseDTO;
+import com.example.cursos_backend.enums.Role;
+import com.example.cursos_backend.exceptions.InvalidAccessException;
+import com.example.cursos_backend.exceptions.ValueNotFoundException;
 import com.example.cursos_backend.model.Category;
 import com.example.cursos_backend.model.Course;
 import com.example.cursos_backend.model.User;
@@ -11,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,8 +26,9 @@ public class CourseService {
 
 
     public CourseResponseDTO createCourse(CourseRequestDTO request, User instructor) {
-        List<Category> list = categoryRepository.findAllById(request.categoryIds());
-        HashSet<Category> categories = new HashSet<>(list);
+
+        HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
+
         Course course = new Course();
         course.setName(request.name());
         course.setDescription(request.description());
@@ -47,5 +50,37 @@ public class CourseService {
                 newCourse.getDuration(),
                 newCourse.getInstructor().getName(),
                 categoryNames);
+    }
+
+    public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, User user) {
+
+        Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
+
+        boolean isOwner = course.getInstructor().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new InvalidAccessException();
+        }
+
+        HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
+        Set<String> allCategories = categories.stream().map(Category::getName).collect(Collectors.toSet());
+
+        course.setName(request.name());
+        course.setDescription(request.description());
+        course.setPrice(request.price());
+        course.setDuration(request.duration());
+        course.setCategories(categories);
+        Course saved = courseRepository.save(course);
+
+        return new CourseResponseDTO(
+                saved.getId(),
+                saved.getName(),
+                saved.getDescription(),
+                saved.getPrice(),
+                saved.getDuration(),
+                saved.getInstructor().getName(),
+                allCategories
+        );
     }
 }
