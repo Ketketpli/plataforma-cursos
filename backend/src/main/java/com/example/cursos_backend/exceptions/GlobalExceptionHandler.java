@@ -27,4 +27,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> valueNotFoundException(ValueNotFoundException valueNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(valueNotFoundException.getMessage());
     }
+
+    @ExceptionHandler(ValueNotFoundException.class)
+    public ResponseEntity<String> invalidAccessException(InvalidAccessException invalidAccessException) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(invalidAccessException.getMessage());
+    }
+
 }
