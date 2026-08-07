@@ -11,6 +11,8 @@ import com.example.cursos_backend.model.User;
 import com.example.cursos_backend.repositories.CategoryRepository;
 import com.example.cursos_backend.repositories.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -66,6 +68,10 @@ public class CourseService {
         checkAccess(course, user);
 
         courseRepository.deleteById(id);
+    }
+
+    public Page<CourseResponseDTO> getAllCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
     private void checkAccess(Course course, User user) {
