@@ -2,9 +2,8 @@ package com.example.cursos_backend.services;
 
 import com.example.cursos_backend.dtos.CourseRequestDTO;
 import com.example.cursos_backend.dtos.CourseResponseDTO;
-import com.example.cursos_backend.enums.Role;
-import com.example.cursos_backend.exceptions.InvalidAccessException;
 import com.example.cursos_backend.exceptions.ValueNotFoundException;
+import com.example.cursos_backend.infra.AuthorizationHelper;
 import com.example.cursos_backend.model.Category;
 import com.example.cursos_backend.model.Course;
 import com.example.cursos_backend.model.User;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +23,7 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
+    private final AuthorizationHelper authorizationHelper;
 
 
     public CourseResponseDTO createCourse(CourseRequestDTO request, User instructor) {
@@ -47,7 +46,7 @@ public class CourseService {
 
         Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
-        checkAccess(course, user);
+        authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
 
         HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
 
@@ -65,23 +64,13 @@ public class CourseService {
 
         Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
-        checkAccess(course, user);
+        authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
 
         courseRepository.deleteById(id);
     }
 
     public Page<CourseResponseDTO> getAllCourses(Pageable pageable) {
         return courseRepository.findAll(pageable).map(this::toResponseDTO);
-    }
-
-    private void checkAccess(Course course, User user) {
-
-        boolean isOwner = course.getInstructor().getId().equals(user.getId());
-        boolean isAdmin = user.getRole() == Role.ADMIN;
-
-        if (!isOwner && !isAdmin) {
-            throw new InvalidAccessException();
-        }
     }
 
     private CourseResponseDTO toResponseDTO(Course course) {
