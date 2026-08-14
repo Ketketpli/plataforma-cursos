@@ -42,6 +42,15 @@ public class LessonController {
     }
 
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @PutMapping("/{lessonId}")
+    public ResponseEntity<LessonResponseDTO> updateLesson(@PathVariable Long lessonId, @Valid @RequestBody LessonRequestDTO request, @AuthenticationPrincipal User user) {
+
+        LessonResponseDTO updatedLesson = lessonService.updateLesson(lessonId, request, user);
+
+        return ResponseEntity.ok(updatedLesson);
+    }
+
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     @DeleteMapping("/{lessonId}")
     public ResponseEntity<Void> deleteLesson(@PathVariable Long lessonId, @AuthenticationPrincipal User user) {
 

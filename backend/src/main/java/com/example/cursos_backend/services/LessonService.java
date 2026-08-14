@@ -49,6 +49,23 @@ public class LessonService {
         return lessons.map(this::toResponseDTO);
     }
 
+    public LessonResponseDTO updateLesson(Long lessonId, LessonRequestDTO request, User user) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ValueNotFoundException("Aula não encontrada"));
+
+        authorizationHelper.checkOwnerOrAdmin(lesson.getCourse().getInstructor().getId(), user);
+
+        lesson.setTitle(request.title());
+        lesson.setDescription(request.description());
+        lesson.setContent(request.content());
+        lesson.setLessonOrder(request.lessonOrder());
+
+        Lesson saved = lessonRepository.save(lesson);
+
+        return toResponseDTO(saved);
+    }
+
     public void deleteLesson(Long lessonId, User user) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
