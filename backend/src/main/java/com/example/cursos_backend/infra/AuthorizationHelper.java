@@ -16,4 +16,12 @@ public class AuthorizationHelper {
             throw new InvalidAccessException();
         }
     }
+
+    public void checkNotOwner(Long ownerId, User user) {
+        boolean isOwner = ownerId.equals(user.getId());
+
+        if (isOwner) {
+            throw new InvalidAccessException();
+        }
+    }
 }
