@@ -33,4 +33,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(invalidAccessException.getMessage());
     }
 
+    @ExceptionHandler(EnrollmentAlreadyExistException.class)
+    public ResponseEntity<String> enrollmentAlreadyExist(EnrollmentAlreadyExistException enrollmentAlreadyExistException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(enrollmentAlreadyExistException.getMessage());
+    }
 }
