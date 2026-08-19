@@ -37,4 +37,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> enrollmentAlreadyExist(EnrollmentAlreadyExistException enrollmentAlreadyExistException) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(enrollmentAlreadyExistException.getMessage());
     }
+
+    @ExceptionHandler(CourseNotCompleteException.class)
+    public ResponseEntity<String> courseNotCompleteException(CourseNotCompleteException courseNotCompleteException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(courseNotCompleteException.getMessage());
+    }
 }
