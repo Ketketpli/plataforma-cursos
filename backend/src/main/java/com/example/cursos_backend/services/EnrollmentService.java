@@ -21,6 +21,7 @@ public class EnrollmentService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AuthorizationHelper authorizationHelper;
+    private final LessonProgressService lessonProgressService;
 
     public EnrollResponseDTO enroll(Long courseId, User student) {
 
@@ -35,6 +36,8 @@ public class EnrollmentService {
         enrollment.setStudent(student);
         enrollment.setEnrolledAt(LocalDateTime.now());
         enrollmentRepository.save(enrollment);
+
+        lessonProgressService.initializeProgress(enrollment);
 
         return new EnrollResponseDTO(enrollment.getId(),
                 enrollment.getCourse().getId(),
