@@ -24,4 +24,10 @@ public class AuthorizationHelper {
             throw new InvalidAccessException();
         }
     }
+
+    public void checkOwner(Long ownerId, User user) {
+        if (!ownerId.equals(user.getId())) {
+            throw new InvalidAccessException();
+        }
+    }
 }
