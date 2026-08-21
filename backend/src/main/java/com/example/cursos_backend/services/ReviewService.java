@@ -59,6 +59,16 @@ public class ReviewService {
         return reviews.map(this::toResponse);
     }
 
+    public void deleteReview(Long reviewId, User student) {
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ValueNotFoundException("Review não encontrada"));
+
+        authorizationHelper.checkOwner(review.getEnrollment().getStudent().getId(), student);
+
+        reviewRepository.deleteById(reviewId);
+    }
+
     private ReviewResponseDTO toResponse(Review review) {
         return new ReviewResponseDTO(
                 review.getId(),
