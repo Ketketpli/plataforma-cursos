@@ -73,7 +73,7 @@ public class CourseService {
         return courseRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
-    private CourseResponseDTO toResponseDTO(Course course) {
+    public CourseResponseDTO toResponseDTO(Course course) {
 
         return new CourseResponseDTO(
                 course.getId(),
