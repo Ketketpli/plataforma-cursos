@@ -7,22 +7,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/enrollments/{enrollmentId}/certificate")
 @RequiredArgsConstructor
 public class CertificateController {
 
     private final CertificateService certificateService;
 
-    @PostMapping
+    @PostMapping("/enrollments/{enrollmentId}/certificates")
     public ResponseEntity<CertificateResponseDTO> createCertificate(@PathVariable Long enrollmentId, @AuthenticationPrincipal User student) {
 
         CertificateResponseDTO newCertificate = certificateService.issue(enrollmentId, student);
         return ResponseEntity.status(HttpStatus.CREATED).body(newCertificate);
+    }
+
+    @GetMapping("/certificates")
+    public ResponseEntity<List<CertificateResponseDTO>> getMyCertificates(@AuthenticationPrincipal User student) {
+
+        List<CertificateResponseDTO> certificates = certificateService.listByStudent(student.getId());
+        return ResponseEntity.ok(certificates);
     }
 }
