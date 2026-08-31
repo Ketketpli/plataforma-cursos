@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +46,17 @@ public class CertificateService {
                 certificate.getId(),
                 certificate.getEnrollment().getId(),
                 certificate.getIssuedAt());
+    }
+
+    public List<CertificateResponseDTO> listByStudent(Long studentId) {
+
+        List<Certificate> certificates = certificateRepository.findByEnrollmentStudentId(studentId);
+
+        return certificates.stream()
+                .map(certificate -> new CertificateResponseDTO(
+                        certificate.getId(),
+                        certificate.getEnrollment().getId(),
+                        certificate.getIssuedAt()))
+                .toList();
     }
 }
