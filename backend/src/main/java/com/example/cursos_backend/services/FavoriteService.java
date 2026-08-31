@@ -22,7 +22,7 @@ public class FavoriteService {
     private final CourseService courseService;
 
     @Transactional
-    public Boolean toggleFavorite(User student, Long courseId) {
+    public Boolean toggleFavorite(Long courseId, User student) {
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
