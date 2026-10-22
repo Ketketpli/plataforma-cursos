@@ -1,0 +1,39 @@
+package com.example.cursos_backend.services;
+
+import com.example.cursos_backend.dtos.InstructorCourseDashboardDTO;
+import com.example.cursos_backend.model.Course;
+import com.example.cursos_backend.model.User;
+import com.example.cursos_backend.repositories.CourseRepository;
+import com.example.cursos_backend.repositories.EnrollmentRepository;
+import com.example.cursos_backend.repositories.ReviewRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+@RequiredArgsConstructor
+public class DashboardService {
+
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReviewService reviewService;
+
+    public List<InstructorCourseDashboardDTO> getInstructorCourses(User instructor, Pageable pageable) {
+
+        List<Course> courses = courseRepository.findByInstructor(instructor);
+
+        return courses.stream()
+                .map(course -> new InstructorCourseDashboardDTO(
+                        course.getId(),
+                        course.getName(),
+                        enrollmentRepository.countByCourseId(course.getId()),
+                        Objects.requireNonNullElse(reviewRepository.findAverageRatingByCourseId(course.getId()), 0.0), // evita que um null seja recebido pelo front
+                        reviewRepository.findByEnrollmentCourseId(course.getId(), pageable)
+                                .map(reviewService::toResponse)))
+                .toList();
+    }
+}
