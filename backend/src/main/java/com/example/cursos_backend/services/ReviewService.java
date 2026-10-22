@@ -69,7 +69,7 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    private ReviewResponseDTO toResponse(Review review) {
+    public ReviewResponseDTO toResponse(Review review) {
         return new ReviewResponseDTO(
                 review.getId(),
                 review.getEnrollment().getStudent().getName(),
