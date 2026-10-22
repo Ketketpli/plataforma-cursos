@@ -33,7 +33,7 @@ public class CertificateService {
 
         double progress = lessonProgressService.calculateProgress(enrollmentId, student);
 
-        if(progress < 100) {
+        if(!(progress >= 100.0)) {
             throw new CourseNotCompleteException();
         }
 
