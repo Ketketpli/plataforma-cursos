@@ -31,13 +31,13 @@ public class ReviewController {
         return ResponseEntity.created(uri).body(response);
     }
 
-    @PatchMapping("/courses/{courseId}/reviews")
+    @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequestDTO request, @AuthenticationPrincipal User student) {
 
         return ResponseEntity.ok(reviewService.updateReview(request, student, reviewId));
     }
 
-    @GetMapping("/reviews/{reviewId}")
+    @GetMapping("/courses/{courseId}/reviews")
     public ResponseEntity<Page<ReviewResponseDTO>> getAllReviews(@PathVariable Long courseId, Pageable pageable) {
 
         return ResponseEntity.ok(reviewService.getAllReviews(courseId, pageable));
