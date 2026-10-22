@@ -1,9 +1,9 @@
 package com.example.cursos_backend.dtos;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public record InstructorCourseDashboardDTO(Long courseId,
                                            String courseName,
                                            Long enrolledStudentCount,
                                            Double averageRating,
-                                           List<ReviewResponseDTO> reviews) {}
+                                           Page<ReviewResponseDTO> reviews) {}
