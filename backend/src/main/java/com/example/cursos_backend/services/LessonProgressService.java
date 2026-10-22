@@ -70,6 +70,11 @@ public class LessonProgressService {
         authorizationHelper.checkOwner(enrollment.getStudent().getId(), student);
 
         int lessons = lessonRepository.findAllByCourseId(courseId).size();
+
+        if(lessons == 0) {
+            return 0.0;
+        }
+
         long completed = lessonProgressRepository.countByEnrollmentIdAndCompleted(enrollmentId, true);
 
         return (double) completed / lessons * 100;
