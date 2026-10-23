@@ -1,7 +1,9 @@
 package com.example.cursos_backend.services;
 
 import com.example.cursos_backend.dtos.InstructorCourseDashboardDTO;
+import com.example.cursos_backend.dtos.StudentCourseDashboardDTO;
 import com.example.cursos_backend.model.Course;
+import com.example.cursos_backend.model.Enrollment;
 import com.example.cursos_backend.model.User;
 import com.example.cursos_backend.repositories.CourseRepository;
 import com.example.cursos_backend.repositories.EnrollmentRepository;
@@ -21,6 +23,7 @@ public class DashboardService {
     private final EnrollmentRepository enrollmentRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewService reviewService;
+    private final LessonProgressService lessonProgressService;
 
     public List<InstructorCourseDashboardDTO> getInstructorCourses(User instructor, Pageable pageable) {
 
@@ -34,6 +37,19 @@ public class DashboardService {
                         Objects.requireNonNullElse(reviewRepository.findAverageRatingByCourseId(course.getId()), 0.0), // evita que um null seja recebido pelo front
                         reviewRepository.findByEnrollmentCourseId(course.getId(), pageable)
                                 .map(reviewService::toResponse)))
+                .toList();
+    }
+
+    public List<StudentCourseDashboardDTO> getStudentCourses(User student) {
+
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(student.getId());
+
+        return enrollments.stream()
+                .map(enrollment -> new StudentCourseDashboardDTO(
+                        enrollment.getCourse().getId(),
+                        enrollment.getCourse().getName(),
+                        enrollment.getCourse().getInstructor().getName(),
+                        lessonProgressService.calculateProgress(enrollment.getId(), student)))
                 .toList();
     }
 }

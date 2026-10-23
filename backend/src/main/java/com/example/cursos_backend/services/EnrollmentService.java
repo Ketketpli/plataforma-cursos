@@ -1,7 +1,6 @@
 package com.example.cursos_backend.services;
 
 import com.example.cursos_backend.dtos.EnrollResponseDTO;
-import com.example.cursos_backend.dtos.StudentCourseDashboardDTO;
 import com.example.cursos_backend.exceptions.EnrollmentAlreadyExistException;
 import com.example.cursos_backend.exceptions.ValueNotFoundException;
 import com.example.cursos_backend.infra.AuthorizationHelper;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,18 +43,5 @@ public class EnrollmentService {
                 enrollment.getCourse().getId(),
                 enrollment.getStudent().getId(),
                 enrollment.getEnrolledAt());
-    }
-
-    public List<StudentCourseDashboardDTO> getMyCourses(User student) {
-
-        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(student.getId());
-
-        return enrollments.stream()
-                .map(enrollment -> new StudentCourseDashboardDTO(
-                        enrollment.getCourse().getId(),
-                        enrollment.getCourse().getName(),
-                        enrollment.getCourse().getInstructor().getName(),
-                        lessonProgressService.calculateProgress(enrollment.getId(), student)))
-                .toList();
     }
 }
