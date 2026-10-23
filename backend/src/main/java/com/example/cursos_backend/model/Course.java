@@ -51,4 +51,7 @@ public class Course {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User instructor;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }
