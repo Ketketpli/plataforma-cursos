@@ -25,7 +25,6 @@ public class CourseService {
     private final CategoryRepository categoryRepository;
     private final AuthorizationHelper authorizationHelper;
 
-
     public CourseResponseDTO createCourse(CourseRequestDTO request, User instructor) {
 
         HashSet<Category> categories = new HashSet<>(categoryRepository.findAllById(request.categoryIds()));
@@ -64,13 +63,19 @@ public class CourseService {
 
         Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
+        if (!course.isActive()) {
+            throw new ValueNotFoundException("Curso não encontrado");
+        }
+
         authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
 
-        courseRepository.deleteById(id);
+        course.setActive(false);
+
+        courseRepository.save(course);
     }
 
     public Page<CourseResponseDTO> getAllCourses(Pageable pageable) {
-        return courseRepository.findAll(pageable).map(this::toResponseDTO);
+        return courseRepository.findByActiveTrue(pageable).map(this::toResponseDTO);
     }
 
     public CourseResponseDTO toResponseDTO(Course course) {
