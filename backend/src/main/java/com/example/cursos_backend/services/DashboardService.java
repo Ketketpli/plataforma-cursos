@@ -27,7 +27,7 @@ public class DashboardService {
 
     public List<InstructorCourseDashboardDTO> getInstructorCourses(User instructor, Pageable pageable) {
 
-        List<Course> courses = courseRepository.findByInstructor(instructor);
+        List<Course> courses = courseRepository.findByInstructorAndActiveTrue(instructor);
 
         return courses.stream()
                 .map(course -> new InstructorCourseDashboardDTO(
