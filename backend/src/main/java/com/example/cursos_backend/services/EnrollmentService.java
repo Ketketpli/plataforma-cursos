@@ -25,7 +25,7 @@ public class EnrollmentService {
 
     public EnrollResponseDTO enroll(Long courseId, User student) {
 
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
+        Course course = courseRepository.findByIdAndActiveTrue(courseId).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
         authorizationHelper.checkNotOwner(course.getInstructor().getId(), student);
         if (enrollmentRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
             throw new EnrollmentAlreadyExistException("Aluno já matriculado");
