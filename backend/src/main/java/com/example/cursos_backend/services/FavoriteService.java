@@ -24,7 +24,7 @@ public class FavoriteService {
     @Transactional
     public Boolean toggleFavorite(Long courseId, User student) {
 
-        Course course = courseRepository.findById(courseId)
+        Course course = courseRepository.findByIdAndActiveTrue(courseId)
                 .orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
         if (favoriteRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
@@ -41,7 +41,7 @@ public class FavoriteService {
     }
 
     public List<CourseResponseDTO> getFavorites(Long studentId) {
-        List<Favorite> favorites = favoriteRepository.findByStudentId(studentId);
+        List<Favorite> favorites = favoriteRepository.findByStudentIdAndCourseActiveTrue(studentId);
         return favorites.stream()
                 .map(favorite -> courseService.toResponseDTO(favorite.getCourse()))
                 .toList();
