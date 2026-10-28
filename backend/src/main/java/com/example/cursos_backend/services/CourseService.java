@@ -43,7 +43,7 @@ public class CourseService {
 
     public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, User user) {
 
-        Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
+        Course course = courseRepository.findByIdAndActiveTrue(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
         authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
 
@@ -61,11 +61,7 @@ public class CourseService {
 
     public void deleteCourse(Long id, User user) {
 
-        Course course = courseRepository.findById(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
-
-        if (!course.isActive()) {
-            throw new ValueNotFoundException("Curso não encontrado");
-        }
+        Course course = courseRepository.findByIdAndActiveTrue(id).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
         authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
 
