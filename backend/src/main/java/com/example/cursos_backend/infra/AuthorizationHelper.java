@@ -8,11 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthorizationHelper {
 
-    public void checkOwnerOrAdmin(Long ownerId, User user) {
+    public boolean isOwnerOrAdmin(Long ownerId, User user) {
         boolean isOwner = ownerId.equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
 
-        if (!isOwner && !isAdmin) {
+        return isOwner || isAdmin;
+    }
+
+    public void checkOwnerOrAdmin(Long ownerId, User user) {
+        if (!isOwnerOrAdmin(ownerId, user)) {
             throw new InvalidAccessException();
         }
     }
