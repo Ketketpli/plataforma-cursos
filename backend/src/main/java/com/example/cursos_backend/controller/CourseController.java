@@ -28,7 +28,7 @@ public class CourseController {
 
         CourseResponseDTO course = courseService.createCourse(request, user);
 
-        URI location = URI.create("/course/" + course.id());
+        URI location = URI.create("/courses/" + course.id());
 
         return ResponseEntity.created(location).body(course);
     }
