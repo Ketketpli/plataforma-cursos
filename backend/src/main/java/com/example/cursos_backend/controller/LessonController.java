@@ -34,9 +34,9 @@ public class LessonController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<LessonResponseDTO>> getLessonByCourse(@PathVariable Long courseId, Pageable pageable) {
+    public ResponseEntity<Page<LessonResponseDTO>> getLessonByCourse(@PathVariable Long courseId, Pageable pageable, @AuthenticationPrincipal User user) {
 
-        Page<LessonResponseDTO> lessons = lessonService.getLessonByCourse(courseId, pageable);
+        Page<LessonResponseDTO> lessons = lessonService.getLessonByCourse(courseId, user, pageable);
 
         return ResponseEntity.ok(lessons);
     }
