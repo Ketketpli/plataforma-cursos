@@ -26,7 +26,7 @@ public class LessonService {
 
     public LessonResponseDTO createLesson(LessonRequestDTO request, Long courseId, User user) {
 
-        Course course = courseRepository.findById(courseId)
+        Course course = courseRepository.findByIdAndActiveTrue(courseId)
                 .orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
 
         authorizationHelper.checkOwnerOrAdmin(course.getInstructor().getId(), user);
@@ -50,6 +50,10 @@ public class LessonService {
 
         boolean hasAccess = authorizationHelper.isOwnerOrAdmin(course.getInstructor().getId(), user)
                 || enrollmentRepository.existsByStudentIdAndCourseId(user.getId(), courseId);
+
+        if (!course.isActive() && !hasAccess) {
+            throw new ValueNotFoundException("Curso não encontrado");
+        }
 
         Page<Lesson> lessons = lessonRepository.findByCourseId(courseId, pageable);
 
