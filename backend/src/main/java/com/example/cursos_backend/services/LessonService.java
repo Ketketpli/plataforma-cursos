@@ -8,12 +8,12 @@ import com.example.cursos_backend.model.Course;
 import com.example.cursos_backend.model.Lesson;
 import com.example.cursos_backend.model.User;
 import com.example.cursos_backend.repositories.CourseRepository;
+import com.example.cursos_backend.repositories.EnrollmentRepository;
 import com.example.cursos_backend.repositories.LessonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +22,7 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
     private final AuthorizationHelper authorizationHelper;
+    private final EnrollmentRepository enrollmentRepository;
 
     public LessonResponseDTO createLesson(LessonRequestDTO request, Long courseId, User user) {
 
@@ -39,14 +40,20 @@ public class LessonService {
 
         Lesson saved = lessonRepository.save(lesson);
 
-        return toResponseDTO(saved);
+        return toResponseDTO(saved, true);
     }
 
-    public Page<LessonResponseDTO> getLessonByCourse(Long courseId, Pageable pageable) {
+    public Page<LessonResponseDTO> getLessonByCourse(Long courseId, User user, Pageable pageable) {
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
+
+        boolean hasAccess = authorizationHelper.isOwnerOrAdmin(course.getInstructor().getId(), user)
+                || enrollmentRepository.existsByStudentIdAndCourseId(user.getId(), courseId);
 
         Page<Lesson> lessons = lessonRepository.findByCourseId(courseId, pageable);
 
-        return lessons.map(this::toResponseDTO);
+        return lessons.map(lesson -> toResponseDTO(lesson, hasAccess));
     }
 
     public LessonResponseDTO updateLesson(Long lessonId, LessonRequestDTO request, User user) {
@@ -63,7 +70,7 @@ public class LessonService {
 
         Lesson saved = lessonRepository.save(lesson);
 
-        return toResponseDTO(saved);
+        return toResponseDTO(saved, true);
     }
 
     public void deleteLesson(Long lessonId, User user) {
@@ -76,12 +83,12 @@ public class LessonService {
         lessonRepository.delete(lesson);
     }
 
-    private LessonResponseDTO toResponseDTO(Lesson lesson) {
+    private LessonResponseDTO toResponseDTO(Lesson lesson, boolean hasAcess) {
         return new LessonResponseDTO(
                 lesson.getId(),
                 lesson.getTitle(),
                 lesson.getDescription(),
-                lesson.getContent(),
+                hasAcess ? lesson.getContent() : null,
                 lesson.getLessonOrder());
     }
 }
