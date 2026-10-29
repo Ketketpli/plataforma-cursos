@@ -12,8 +12,6 @@ import com.example.cursos_backend.repositories.LessonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class LessonProgressService {
@@ -23,41 +21,36 @@ public class LessonProgressService {
     private final AuthorizationHelper authorizationHelper;
     private final EnrollmentRepository enrollmentRepository;
 
-    public void initializeProgress(Enrollment enrollment) {
-        List<Lesson> lessons = lessonRepository.findAllByCourseId(enrollment.getCourse().getId());
-
-        List<LessonProgress> progressList = lessons.stream()
-                .map(lesson ->
-                {LessonProgress progress = new LessonProgress();
-                progress.setEnrollment(enrollment);
-                progress.setLesson(lesson);
-                progress.setCompleted(false);
-                return progress;})
-                .toList();
-
-        lessonProgressRepository.saveAll(progressList);
-
-        // O .stream() percorre a lista de Lesson
-        // O .map(...) transforma cada Lesson num LessonProgress novo (com o enrollment fixo, a lesson daquela iteração, e completed = false)
-        // O .toList() fecha coletando tudo numa lista nova. Depois é só saveAll nessa lista.
-    }
-
     public void toggleCompletion(Long enrollmentId, Long lessonId, User student) {
 
-        LessonProgress progress = lessonProgressRepository.findByEnrollmentIdAndLessonId(enrollmentId, lessonId)
-                .orElseThrow(() -> new ValueNotFoundException("Progresso não encontrado"));
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ValueNotFoundException("Matrícula não encontrada"));
 
-        authorizationHelper.checkOwner(progress.getEnrollment().getStudent().getId(), student);
+        authorizationHelper.checkOwner(enrollment.getStudent().getId(), student);
+
+        LessonProgress progress = lessonProgressRepository.findByEnrollmentIdAndLessonId(enrollmentId, lessonId)
+                        .orElseGet(() -> createProgress(enrollment, lessonId));
 
         progress.setCompleted(!progress.isCompleted());
 
         lessonProgressRepository.save(progress);
+    }
 
-        // busca o registro de progresso daquela matrícula+aula específica
-        // checkOwner garante que só o aluno dono da matrícula pode marcar/desmarcar
-        // !progress.isCompleted() inverte o valor atual: true vira false e false vira true
-        //   -> mesmo método serve tanto pra marcar quanto pra desmarcar, sem precisar de if
-        // save persiste a mudança no banco
+    private LessonProgress createProgress(Enrollment enrollment, Long lessonId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ValueNotFoundException("Aula não encontrada"));
+
+        if (!lesson.getCourse().getId().equals(enrollment.getCourse().getId())) {
+            throw new ValueNotFoundException("Aula não encontrada");
+        }
+
+        LessonProgress progress = new LessonProgress();
+        progress.setEnrollment(enrollment);
+        progress.setLesson(lesson);
+        progress.setCompleted(false);
+
+        return progress;
     }
 
     public double calculateProgress(Long enrollmentId, User student) {
@@ -69,7 +62,7 @@ public class LessonProgressService {
 
         authorizationHelper.checkOwner(enrollment.getStudent().getId(), student);
 
-        int lessons = lessonRepository.findAllByCourseId(courseId).size();
+        long lessons = lessonRepository.countByCourseId(courseId);
 
         if(lessons == 0) {
             return 0.0;
