@@ -3,9 +3,11 @@ package com.example.cursos_backend.services;
 import com.example.cursos_backend.dtos.CategoryRequestDTO;
 import com.example.cursos_backend.dtos.CategoryResponseDTO;
 import com.example.cursos_backend.exceptions.CategoryAlreadyExistsException;
+import com.example.cursos_backend.exceptions.ConflictException;
 import com.example.cursos_backend.exceptions.ValueNotFoundException;
 import com.example.cursos_backend.model.Category;
 import com.example.cursos_backend.repositories.CategoryRepository;
+import com.example.cursos_backend.repositories.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CourseRepository courseRepository;
 
     public CategoryResponseDTO createCategory(CategoryRequestDTO request) {
 
@@ -57,6 +60,10 @@ public class CategoryService {
 
         if (!categoryRepository.existsById(id)) {
             throw new ValueNotFoundException();
+        }
+
+        if (courseRepository.existsByCategoriesId(id)) {
+            throw new ConflictException("Categoria em uso por cursos");
         }
 
         categoryRepository.deleteById(id);
