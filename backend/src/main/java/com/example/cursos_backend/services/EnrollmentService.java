@@ -21,12 +21,12 @@ public class EnrollmentService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AuthorizationHelper authorizationHelper;
-    private final LessonProgressService lessonProgressService;
 
     public EnrollResponseDTO enroll(Long courseId, User student) {
 
         Course course = courseRepository.findByIdAndActiveTrue(courseId).orElseThrow(() -> new ValueNotFoundException("Curso não encontrado"));
         authorizationHelper.checkNotOwner(course.getInstructor().getId(), student);
+
         if (enrollmentRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
             throw new EnrollmentAlreadyExistException("Aluno já matriculado");
         }
@@ -36,8 +36,6 @@ public class EnrollmentService {
         enrollment.setStudent(student);
         enrollment.setEnrolledAt(LocalDateTime.now());
         enrollmentRepository.save(enrollment);
-
-        lessonProgressService.initializeProgress(enrollment);
 
         return new EnrollResponseDTO(enrollment.getId(),
                 enrollment.getCourse().getId(),
