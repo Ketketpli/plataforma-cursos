@@ -15,5 +15,5 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     Page<Lesson> findByCourseId(Long courseId, Pageable pageable); // Lista paginada
 
-    List<Lesson> findAllByCourseId(Long courseId); // Lista completa
+    long countByCourseId(Long courseId);
 }
