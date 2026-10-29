@@ -42,4 +42,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> courseNotCompleteException(CourseNotCompleteException courseNotCompleteException) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(courseNotCompleteException.getMessage());
     }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<String> conflictException(ConflictException conflictException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(conflictException.getMessage());
+    }
 }
